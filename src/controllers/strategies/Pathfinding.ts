@@ -14,7 +14,7 @@ import { Vector } from '../../../../nodetron-math/src/Vector2D'
 
 class Tile {
   value?: number; // value = startDistance + endDistance
-  isObstructed?: boolean;  // if there is an obstacle on the tile
+  isObstructed: boolean;  // if there is an obstacle on the tile
   parent?: Tile;  // the previous tile that's lead to this actual tile
   startDistance?: number;  // distance between the start and this tile
   endDistance?: number;  // estimated distance between this tile and the end, pythagorean distance squared
@@ -23,10 +23,10 @@ class Tile {
   
   discovered: boolean = false;
 
-  constructor(x: number, y: number,Obstruction: ){
+  constructor(x: number, y: number, isObstructed: boolean ){
     this.x = x;
     this.y = y;
-    this.isObstructed = Obstruction
+    this.isObstructed = isObstructed
   }
 }
 
@@ -109,14 +109,16 @@ export default class Pathfinding extends Strategies {
         for(let IInterval of BlackListI){
           for(let JInterval of BlackListJ){
             if (i > IInterval[0] && i < IInterval[1] && j > JInterval[0] && j < JInterval[1]) {
-              grid[i][j] = new Tile(j, i);
-              
+              grid[i][j] = new Tile(j, i,true);
             }
-          } 
-        } 
+            else{
+              grid[i][j] = new Tile(j, i,false);
+            }
+          }
+        }
       }
     }
-    // ton micro marche pas !
+
 
     
   } 
