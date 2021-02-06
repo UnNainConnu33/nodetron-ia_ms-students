@@ -220,18 +220,4 @@ export default class Pathfinding extends Strategies {
 
     return true
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
