@@ -1,10 +1,8 @@
 import { ActionSchema, Context, ServiceBroker } from 'moleculer'
 import { MoveToMessage } from '@nodetron/types/control/moveTo'
 import Strategies from '@nodetron/types/task-manager/tasks/strategies'
-
 import { state } from '../../models/state'
 import { sin, cos, pi, sqrt, square, i } from 'mathjs'
-
 import { Vector } from '../../../../nodetron-math/src/Vector2D'
 
 /**
@@ -61,11 +59,11 @@ export default class Pathfinding extends Strategies {
   public Grid(NbColumns: number, NbRows: number, SpaceBetRobots: number){
     // Columns: i <=> x   Rows: j <=> y (x,y) is continuous and (i,j) is discreet
 
-    //Ratio between continuous and discreet value ratio = (x,y)/(i,j)
+    // Ratio between continuous and discreet value ratio = (x,y)/(i,j)
     let XIRatio = state.world.field.length/NbColumns
     let YJRatio = state.world.field.width/NbRows
     
-    // obstacle list creation
+    // Obstacle list creation
     let ObstacleList: number[][] = [] // of the form [[x, y, radius], [x, y, radius], ... [x, y, radius]] (radius in meter)
         ObstacleList.push([state.world.ball.position.x , state.world.ball.position.y , state.world.ball.radius + state.world.robots.allies[this.id].radius + SpaceBetRobots])
     
@@ -79,21 +77,20 @@ export default class Pathfinding extends Strategies {
         ObstacleList.push([state.world.robots.allies[ID].position.x , state.world.robots.allies[ID].position.y , state.world.robots.allies[ID].radius + state.world.robots.allies[this.id].radius + SpaceBetRobots])
       }
     }
-    //random: ObstacleList.push()     state.world.robots.allies[ID]       Tile[][] = []
+
+    // random: ObstacleList.push()     state.world.robots.allies[ID]       Tile[][] = []
+    console.log(ObstacleList)
     
-    
-    
-    
-    //Obstacle generation
-    let BlackListI:number[][] = []
-    let BlackListJ:number[][] = []
+    // Obstacle generation
+    let BlackListI: number[][] = []
+    let BlackListJ: number[][] = []
     
     for(let Obstacle of ObstacleList) {
-      let XInterval = [Obstacle[0]-Obstacle[2],Obstacle[0]+Obstacle[2]]
-      let YInterval = [Obstacle[1]-Obstacle[2],Obstacle[1]+Obstacle[2]]
+      let XInterval = [Obstacle[0] - Obstacle[2], Obstacle[0] + Obstacle[2]]
+      let YInterval = [Obstacle[1] - Obstacle[2], Obstacle[1] + Obstacle[2]]
       
-      let IInterval = [Math.floor(XIRatio/XInterval[0]),Math.ceil(XIRatio/XInterval[1])]
-      let JInterval = [Math.floor(YJRatio/YInterval[0]),Math.ceil(YJRatio/YInterval[1])]
+      let IInterval = [Math.floor(XIRatio/XInterval[0]), Math.ceil(XIRatio/XInterval[1])]
+      let JInterval = [Math.floor(YJRatio/YInterval[0]), Math.ceil(YJRatio/YInterval[1])]
 
       BlackListI.push(IInterval)
       BlackListJ.push(JInterval)
@@ -109,26 +106,20 @@ export default class Pathfinding extends Strategies {
         for(let IInterval of BlackListI){
           for(let JInterval of BlackListJ){
             if (i > IInterval[0] && i < IInterval[1] && j > JInterval[0] && j < JInterval[1]) {
-              grid[i][j] = new Tile(j, i,true);
+              grid[i][j] = new Tile(i, j, true);
             }
             else{
-              grid[i][j] = new Tile(j, i,false);
+              grid[i][j] = new Tile(i, j, false);
             }
           }
         }
       }
     }
-
-
-    
   } 
-
-
 
   public Astar(grid: Array<Array<Tile>>, robotPosition: Vector, destination: Vector){
     // reference : https://hurna.io/fr/academy/algorithms/maze_pathfinder/a_star.html
     let priority_queue: Array<Tile> = new Array();
-
 
     let startTile: Tile = grid[robotPosition.y][robotPosition.x];
     let endTile: Tile = grid[destination.y][destination.x];
@@ -141,7 +132,7 @@ export default class Pathfinding extends Strategies {
     while (priority_queue.length > 0){
 
       // find the tile with the lowest value
-      
+    
       let minIndex: number = 0;
       let i: number = 0;
       priority_queue.forEach(tile => {
@@ -160,12 +151,12 @@ export default class Pathfinding extends Strategies {
       shifts.forEach(shift => {
         let neighborX = actualTile.x + shift[0];
         let neighborY = actualTile.y + shift[1];
-
-        if (0 <= neighborX < grid[0].length && 0 <= neighborY < grid.length && !grid[neighborY][neighborX].discovered){
+      
+        if (0 <= neighborX < grid[actualTile.x][actualTile.y].length && 0 <= neighborY < grid[actualTile.x][actualTile.y].length && !grid[neighborY][neighborX].discovered){
           unvisitedNeighbors.push(grid[neighborY][neighborX])
         }
       });
-
+      
       
       // iterate over unvisited neighbors
 
