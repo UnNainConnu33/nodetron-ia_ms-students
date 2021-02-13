@@ -2,7 +2,7 @@ import { ActionSchema, Context, ServiceBroker } from 'moleculer'
 import { MoveToMessage } from '@nodetron/types/control/moveTo'
 import Strategies from '@nodetron/types/task-manager/tasks/strategies'
 import { state } from '../../models/state'
-import { sin, cos, pi, sqrt, square, i } from 'mathjs'
+import { sin, cos, pi, sqrt, square, i, not } from 'mathjs'
 import { Vector } from '../../../../nodetron-math/src/Vector2D'
 
 /**
@@ -11,7 +11,7 @@ import { Vector } from '../../../../nodetron-math/src/Vector2D'
  */
 
 class Tile {
-  value?: number; // value = startDistance + endDistance
+  value?:number; // value = startDistance + endDistance
   isObstructed: boolean;  // if there is an obstacle on the tile
   parent?: Tile;  // the previous tile that's lead to this actual tile
   startDistance?: number;  // distance between the start and this tile
@@ -47,7 +47,7 @@ export default class Pathfinding extends Strategies {
     },
 
     handler(ctx: Context<{ id: number, point: Vector }>): void {
-      ctx.broker.logger.info('MoveToPacket packet received')
+      ctx.broker.logger.info('Obstacle avoidance algorithm')
       state.assign.register([ctx.params.id], new Pathfinding(ctx.params.id, ctx.params.point))
     },  
   }
@@ -79,21 +79,19 @@ export default class Pathfinding extends Strategies {
     }
 
     // random: ObstacleList.push()     state.world.robots.allies[ID]       Tile[][] = []
-    console.log(ObstacleList)
+    console.log(ObstacleList);
     
     // Obstacle generation
-    let BlackListI: number[][] = []
-    let BlackListJ: number[][] = []
+    let BlackList: number[][][] = [];
     
     for(let Obstacle of ObstacleList) {
-      let XInterval = [Obstacle[0] - Obstacle[2], Obstacle[0] + Obstacle[2]]
-      let YInterval = [Obstacle[1] - Obstacle[2], Obstacle[1] + Obstacle[2]]
-      
-      let IInterval = [Math.floor(XIRatio/XInterval[0]), Math.ceil(XIRatio/XInterval[1])]
-      let JInterval = [Math.floor(YJRatio/YInterval[0]), Math.ceil(YJRatio/YInterval[1])]
+        let XInterval = [Obstacle[0] - Obstacle[2], Obstacle[0] + Obstacle[2]];
+        let YInterval = [Obstacle[1] - Obstacle[2], Obstacle[1] + Obstacle[2]];
+        
+        let IInterval = [Math.floor(XIRatio / XInterval[0]), Math.ceil(XIRatio / XInterval[1])];
+        let JInterval = [Math.floor(YJRatio / YInterval[0]), Math.ceil(YJRatio / YInterval[1])];
 
-      BlackListI.push(IInterval)
-      BlackListJ.push(JInterval)
+        BlackList.push([IInterval,JInterval]);
     }
 
     // grid creation and filling
@@ -103,18 +101,18 @@ export default class Pathfinding extends Strategies {
     for(let i = 0; i < NbColumns; i++){
       grid[i] = new Array();
       for(let j = 0; j < NbRows; j++){
-        for(let IInterval of BlackListI){
-          for(let JInterval of BlackListJ){
-            if (i > IInterval[0] && i < IInterval[1] && j > JInterval[0] && j < JInterval[1]) {
-              grid[i][j] = new Tile(i, j, true);
-            }
-            else{
-              grid[i][j] = new Tile(i, j, false);
-            }
+        for(let Interval of BlackList){
+          let IInterval = Interval[0]; let JInterval = Interval[1];
+          if (i > IInterval[0] && i < IInterval[1] && j > JInterval[0] && j < JInterval[1]) {
+            grid[i][j] = new Tile(i, j, true);
+          }
+          else{
+            grid[i][j] = new Tile(i, j, false);
           }
         }
       }
     }
+    return grid
   } 
 
   public Astar(grid: Array<Array<Tile>>, robotPosition: Vector, destination: Vector){
@@ -124,11 +122,14 @@ export default class Pathfinding extends Strategies {
     let startTile: Tile = grid[robotPosition.y][robotPosition.x];
     let endTile: Tile = grid[destination.y][destination.x];
 
-    startTile.endDistance = Math.abs(endTile.x - startTile.x) ** 2 + Math.abs(endTile.y - startTile.y) ** 2
-    startTile.startDistance = 0
+    startTile.endDistance = Math.sqrt((endTile.x - startTile.x) ** 2 + (endTile.y - startTile.y) ** 2);
+    startTile.startDistance = 0;
+    startTile.value =  startTile.endDistance;
 
     priority_queue.push(startTile)
-
+    //last_path: [Tile];
+    //let last_path: [Tile] = [Tile.constructor(0,  0,  false)];
+    //let done: boolean = false;
     while (priority_queue.length > 0){
 
       // find the tile with the lowest value
@@ -136,45 +137,90 @@ export default class Pathfinding extends Strategies {
       let minIndex: number = 0;
       let i: number = 0;
       priority_queue.forEach(tile => {
-        if (minIndex > tile.value){
-          minIndex = i;
+        try {
+          if (tile.value != undefined && minIndex > tile.value) {
+            minIndex = i;
+          }
+          i++;
+        } // sûrement overkill
+        catch {        
+          i++;
         }
-        i++;
       });
       
-      let actualTile:Tile = priority_queue.splice(minIndex, 1)[0]
+      let actualTile: Tile = priority_queue.splice(minIndex, 1)[0]
 
       // unvisited neighbors
+
+      // const unvisitedNeighbors = neighbor.filter(node => !node.visited)
 
       let shifts: number[][] = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]];
       let unvisitedNeighbors: Array<Tile> = new Array();
       shifts.forEach(shift => {
         let neighborX = actualTile.x + shift[0];
         let neighborY = actualTile.y + shift[1];
-      
-        if (0 <= neighborX < grid[actualTile.x][actualTile.y].length && 0 <= neighborY < grid[actualTile.x][actualTile.y].length && !grid[neighborY][neighborX].discovered){
-          unvisitedNeighbors.push(grid[neighborY][neighborX])
+
+        if (neighborX == destination.x && neighborY == destination.y){
+          // finished// TO DO
+            let finished_path: [Tile] = [Tile.constructor(actualTile.x + shift[0], actualTile.y + shift[1], false)];
+            while (finished_path[-1] != startTile) {
+                let parent_tile = finished_path[-1].parent;
+                if (parent_tile != undefined && parent_tile.parent != undefined) {
+                    finished_path.push(parent_tile.parent);
+                }
+            }
+            //last_path = finished_path;
+            //done = true;
+            return finished_path;
+        }
+
+        /*
+
+        f(n) = total estimated cost of path through node nn
+
+        g(n) = cost so far to reach node nn
+
+        h(n) = estimated cost from n to goal. This is the heuristic part of the cost function, so it is like a guess.
+
+               if not:    
+           put the current node in the closed list and look at all of its neighbors
+           for (each neighbor of the current node):
+               if (neighbor has lower g value than current and is in the closed list) :
+                   replace the neighbor with the new, lower, g value 
+                   current node is now the neighbor's parent            
+               else if (current g value is lower and this neighbor is in the open list ) :
+                   replace the neighbor with the new, lower, g value 
+                   change the neighbor's parent to our current node
+
+               else if this neighbor is not in both lists:
+                   add it to the open list and set its g
+
+        */
+     
+        if ((0 <= neighborX && neighborX < grid[0].length) && (0 <= neighborY && neighborY < grid.length) && !grid[neighborY][neighborX].discovered){
+            grid[neighborY][neighborX].parent = grid[actualTile.y][actualTile.x];
+            unvisitedNeighbors.push(grid[neighborY][neighborX]);
         }
       });
-      
       
       // iterate over unvisited neighbors
 
       unvisitedNeighbors.forEach(Neighbor => {
-        Neighbor.startDistance
+		  Neighbor.startDistance = sqrt((Neighbor.x - startTile.x)**2 + (Neighbor.y - startTile.y)**2);
+		  Neighbor.endDistance = sqrt((Neighbor.x - endTile.x) ** 2 + (Neighbor.y - endTile.y) ** 2);
+
+		  Neighbor.value = Neighbor.startDistance + Neighbor.endDistance;
+
+		  priority_queue.push(Neighbor);
       });
-
-
-      
-      
     }
-
     
+    // endTile.parent
     
   }
-
+  
   compute(broker: ServiceBroker): boolean {
-
+    
     const epsilon = 0.2
     // we collect the position of the ball and the other robots
     let ball = state.world.ball
@@ -182,7 +228,7 @@ export default class Pathfinding extends Strategies {
     let opponents = state.world.robots.opponents
 
     // we declare an array, in which we'll put all the coordinates of the robots and the ball
-    let positions = new Array()
+    let positions = new Array()    
 
     for (let i = 0; i < allies.length && i < opponents.length ; i++) {
       positions.push(allies[i].position, opponents[i].position, ball.position)
@@ -191,11 +237,13 @@ export default class Pathfinding extends Strategies {
     // broker.logger.info(position)
 
     // we define the number of columns and rows
-    let rows = 6
-    let cols = 9
-
-    let grid = new Array()
-    broker.logger.info(grid)
+    let grid = this.Grid(50, 90, 0.1);
+    broker.logger.info(grid);
+    let robotpos = state.world.robots.allies[this.id].position;
+    let trajectory = this.Astar(grid,robotpos,Vector.constructor(1,1))
+    broker.logger.info(trajectory);
+    //let grid = new Array()
+    // broker.logger.info(grid)
 
     /*
     if( (Math.abs(positions[i].x - this.point.x) < epsilon) && (Math.abs(positions[i].y - this.point.y) < epsilon) ) { 
@@ -203,12 +251,13 @@ export default class Pathfinding extends Strategies {
       }
       */ 
 
+    /*
     void broker.call('control.moveTo', {
       id: this.id, 
       target: { x: this.point.x, y: this.point.y},
       orientation: 0,
     } as MoveToMessage)
-
-    return true
+    */
+    return false
   }
 }
