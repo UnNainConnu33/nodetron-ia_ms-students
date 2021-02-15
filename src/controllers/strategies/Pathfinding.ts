@@ -258,6 +258,7 @@ export default class Pathfinding extends Strategies {
       orientation: 0,
     } as MoveToMessage)
     */
+   
     return false
   }
 }
