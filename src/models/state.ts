@@ -49,10 +49,10 @@ const initialData: WorldMessage = {
     radius: 0.05,
   },
   color: Color.YELLOW,
+  gameController: {} as GameControllerEvent,
 }
 
 export const state = {
   world: new World(initialData),
-  gameController: { } as GameControllerEvent,
   assign: new StrategieManager(),
 }

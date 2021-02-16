@@ -16,6 +16,8 @@ const Config = {
   manager: {
     name: get('MANAGER_NAME').asString(),
   },
+  yellow: get('YELLOW').default('true').asBool(),
+
 }
 
 export default Config

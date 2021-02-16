@@ -38,8 +38,9 @@ export abstract class GameStateMachine implements Manager {
   currentStateMethod: stateMethods | undefined
 
   update(broker: ServiceBroker): void {
-    if (state.gameController.command) {
-      switch (state.gameController.command.value) {
+    const { gameController } = state.world
+    if (gameController.command) {
+      switch (gameController.command.value) {
         case GameControllerCommand.STOP:
           this.currentStateMethod = this.statesMethods.onStopped
           broker.logger.debug('Stopping...')
