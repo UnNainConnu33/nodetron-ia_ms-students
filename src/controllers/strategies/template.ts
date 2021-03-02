@@ -1,8 +1,9 @@
 import { ActionSchema, Context, ServiceBroker } from 'moleculer'
 import { MoveToMessage } from '@nodetron/types/control/moveTo'
 import Strategies from '@nodetron/types/task-manager/tasks/strategies'
-
 import { state } from '../../models/state'
+
+// call "MSB.template" ' { "id" : 0 }'
 
 export default class Template extends Strategies {
   name = 'template';
@@ -31,6 +32,6 @@ export default class Template extends Strategies {
       orientation: 0,
     } as MoveToMessage)
 
-    return false
+    return true
   }
 }

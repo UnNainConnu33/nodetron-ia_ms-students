@@ -5,8 +5,6 @@ import { state } from '../../models/state'
 import { sqrt, square, abs, sign, sin, cos, pi, and } from 'mathjs'
 import { Kick } from '@nodetron/types/enum'
 import { Vector} from '../../../../nodetron-math/src/Vector2D'
-/* eslint-disable prefer-const */
-/* eslint-disable no-case-declarations */
 
 // call "MSB.shoot" ' { "id" : 5 }'
 
@@ -28,7 +26,7 @@ export default class Shoot extends Strategies {
       },
     }
 
-    public step = 1;
+    public step = 1
 
     compute(broker: ServiceBroker): boolean {
       const robot = state.world.robots.allies[this.id]
@@ -36,7 +34,7 @@ export default class Shoot extends Strategies {
       let target = ball.position
       let orientation = 0
       const goalCenter =  new Vector(-(state.world.field.length / 2.0), 0)
-      const target2Ball= new Vector (ball.position.x - goalCenter.x, ball.position.y - goalCenter.y )
+      const target2Ball= new Vector(ball.position.x - goalCenter.x, ball.position.y - goalCenter.y )
       const norm = Math.sqrt(target2Ball.x ** 2 + target2Ball.y ** 2)
       target2Ball.x /= norm
       target2Ball.y /= norm
@@ -47,7 +45,7 @@ export default class Shoot extends Strategies {
           orientation = Math.atan2(-target2Ball.y, -target2Ball.x)
           const dist = Math.sqrt(((target.x - robot.position.x) ** 2 - (target.y - robot.position.y) ** 2))
           if (dist < 0.01) {
-            this.step += 1
+            this.step ++
           }
           break
         case 2:
@@ -57,7 +55,7 @@ export default class Shoot extends Strategies {
           target.y -= 0.1 * target2Ball.y
         
           if (robot.infrared) {
-            this.step += 1
+            this.step ++
           }
           break
         default:
@@ -73,6 +71,6 @@ export default class Shoot extends Strategies {
         kick: Kick.CHIP,
       } as MoveToMessage)
       return true
-      //return this.step === 3
+      // return this.step === 3
     }
 }
