@@ -8,8 +8,8 @@ import { Vector} from '../../../../nodetron-math/src/Vector2D'
 
 // call "MSB.shoot" ' { "id" : 5 }'
 
-export default class Shoot extends Strategies {
-    name = 'shoot';
+export default class Attacker extends Strategies {
+    name = 'attacker';
 
     public constructor(public id: number) {
       super()
@@ -22,7 +22,7 @@ export default class Shoot extends Strategies {
         },
       },
       handler(ctx: Context<{ id: number }>): void {
-        state.assign.register([ctx.params.id], new Shoot(ctx.params.id))
+        state.assign.register([ctx.params.id], new Attacker(ctx.params.id))
       },
     }
 
@@ -38,40 +38,16 @@ export default class Shoot extends Strategies {
       const norm = Math.sqrt(target2Ball.x ** 2 + target2Ball.y ** 2)
       target2Ball.x /= norm
       target2Ball.y /= norm
-      switch (this.step) {
-        case 1:
-          target.x += target2Ball.x * 0.5
-          target.y += target2Ball.y * 0.5
-          orientation = Math.atan2(-target2Ball.y, -target2Ball.x)
-          const dist = Math.sqrt(((target.x - robot.position.x) ** 2 - (target.y - robot.position.y) ** 2))
-          if (dist < 0.01) {
-            this.step += 1
-          }
-          break
-        case 2:
-          orientation = Math.atan2(-target2Ball.y, -target2Ball.x)
-
-          target.x -= 0.1 * target2Ball.x
-          target.y -= 0.1 * target2Ball.y
-        
-          if (robot.infrared) {
-            this.step += 1
-          }
-          break
-        default:
-          broker.logger.error('Not implemented')
-      }
 
       void broker.call('control.moveTo', {
         id: this.id,
         target,
         spin: false,
         power: 0.6,
-        orientation: 0,
-        kick: Kick.NO,
+        orientation,
+        kick: Kick.FLAT,
       } as MoveToMessage)
-      
-      //return true
-      return this.step === 3
+      return true
+      //return this.step === 3
     }
 }

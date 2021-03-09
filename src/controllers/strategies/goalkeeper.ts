@@ -30,7 +30,7 @@ export default class Goalkeeper extends Strategies {
 
   compute(broker: ServiceBroker): boolean {
     let defaultRadius = 0.6       // Radius of the goalkeeper's position
-    let X_goalLine = 5            
+    let X_goalLine = 4.8            
     let Y_goalLine = 0            // Middle of the goal line
     let X_ball = X_goalLine - state.world.ball.position.x  
     let Y_ball = Y_goalLine - state.world.ball.position.y

@@ -5,7 +5,7 @@ import { state } from '../../models/state'
 import { sqrt, square, abs, sign, sin, cos, pi } from 'mathjs'
 
 /**
- * call "MSB.Line" '{ "robots_amount" : 4, "opponent_id" : 0, "radius" : 1}'
+ * call "MSB.line" '{ "robots_amount" : 4, "opponent_id" : 0, "radius" : 1}'
  * if opponent_id == 1, then the robot goes to the ball.
  */
 export default class Line extends Strategies {

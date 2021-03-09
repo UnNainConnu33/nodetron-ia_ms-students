@@ -2,13 +2,14 @@ import { ActionSchema, Context, ServiceBroker } from 'moleculer'
 import { MoveToMessage } from '@nodetron/types/control/moveTo'
 import Strategies from '@nodetron/types/task-manager/tasks/strategies'
 import { Vector } from '@nodetron/math/vector2D'
-
 import { state } from '../../models/state'
+import { powDependencies } from 'mathjs'
+import { Kick } from '@nodetron/types/enum'
 
 /**
  * This class is an example of the new way to create Strategies.
  * It is basic and needs to be improved !
- * call "MSB.followBall" ' { "id" : 0 }' (To try with npm run repl)
+ * call "MSB.follow_ball" ' { "id" : 0 }' (To try with npm run repl)
  */
 export default class FollowBall extends Strategies {
     name = 'followBall';
@@ -32,15 +33,17 @@ export default class FollowBall extends Strategies {
     compute(broker: ServiceBroker): boolean {
       const robot = state.world.robots.allies[this.id]
       const { ball } = state.world
-
       const vect = new Vector(ball.position.x - robot.position.x, ball.position.y - robot.position.y)
 
       void broker.call('control.moveTo', {
         id: this.id,
-        target: { ...robot.position },
-        orientation: vect.angle().value,
+        target: ball.position,
+        spin: true,
+        power: 0,
+        kick: Kick.NO,
+        orientation: vect.angle().value
       } as MoveToMessage)
 
-      return false
+      return true
     }
 }

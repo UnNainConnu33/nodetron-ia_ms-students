@@ -18,6 +18,7 @@ import AStar from './astar'
 import semiCircle from './semiCircle'
 import Line from './line'
 import Goalkeeper from './goalkeeper'
+import uTurn from './uTurn'
 
 
 export default {
@@ -40,4 +41,5 @@ export default {
   semiCircle: semiCircle.declaration,
   line: Line.declaration,
   goalkeeper: Goalkeeper.declaration,
+  uTurn: uTurn.declaration,
 }

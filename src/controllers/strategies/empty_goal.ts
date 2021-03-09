@@ -6,10 +6,10 @@ import { sqrt, square, abs, sign, sin, cos, pi, and } from 'mathjs'
 import { Kick } from '@nodetron/types/enum'
 import { Vector} from '../../../../nodetron-math/src/Vector2D'
 
-// call "MSB.shoot" ' { "id" : 5 }'
+// call "MSB.emptyGoal" ' { "id" : 5 }'
 
-export default class Shoot extends Strategies {
-    name = 'shoot';
+export default class EmptyGoal extends Strategies {
+    name = 'emptyGoal';
 
     public constructor(public id: number) {
       super()
@@ -22,7 +22,7 @@ export default class Shoot extends Strategies {
         },
       },
       handler(ctx: Context<{ id: number }>): void {
-        state.assign.register([ctx.params.id], new Shoot(ctx.params.id))
+        state.assign.register([ctx.params.id], new EmptyGoal(ctx.params.id))
       },
     }
 
