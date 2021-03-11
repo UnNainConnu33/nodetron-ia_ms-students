@@ -5,12 +5,11 @@ import { state } from '../../models/state'
 import { sqrt, square, abs, sign, sin, cos, pi, and } from 'mathjs'
 import { Kick } from '@nodetron/types/enum'
 import { Vector} from '../../../../nodetron-math/src/Vector2D'
-import { OrderMessage } from '@nodetron/types/bots/order'
 
-// call "MSB.uTurn" ' { "id" : 1 }'
+// call "MSB.emptyGoal" ' { "id" : 5, "angle" : 1 }'
 
-export default class uTurn extends Strategies {
-    name = 'uTurn';
+export default class OrientationGoalLine extends Strategies {
+    name = 'orientationGoalLine';
 
     public constructor(public id: number) {
       super()
@@ -22,18 +21,18 @@ export default class uTurn extends Strategies {
           type: 'number', min: 0, max: 15,
         },
       },
-      handler(ctx: Context<{ id: number }>): void {
-        state.assign.register([ctx.params.id], new uTurn(ctx.params.id))
+      handler(ctx: Context<{ id: number}>): void {
+        state.assign.register([ctx.params.id], new OrientationGoalLine(ctx.params.id))
       },
     }
 
     compute(broker: ServiceBroker): boolean {
+      const robot = state.world.robots.allies[this.id]
       const ball = state.world.ball
-      let robot = state.world.robots.allies[this.id]
-      let target2Ball = new Vector(ball.position.x - robot.position.x, ball.position.y - robot.position.y)
-      let dist = Math.sqrt(((ball.position.x - robot.position.x) ** 2 - (ball.position.y - robot.position.y) ** 2))
+      const goalCenter =  new Vector(-(state.world.field.length / 2.0), 0)
+      const target2Ball= new Vector(ball.position.x - goalCenter.x, ball.position.y - goalCenter.y )
+      // const norm = Math.sqrt(target2Ball.x ** 2 + target2Ball.y ** 2)
       let step = 1
-
       if (step == 1) {
         void broker.call('control.moveTo', {
           id: this.id,
@@ -64,4 +63,16 @@ export default class uTurn extends Strategies {
     return step === 2
     }
   }
-
+  
+      void broker.call('control.moveTo', {
+        id: this.id,
+        target: ball.position,
+        spin: false,
+        power: 1.5,
+        orientation: Math.atan2(-target2Ball.y, -target2Ball.x ),
+        kick: Kick.FLAT,
+      } as MoveToMessage)
+      
+      return true
+    }
+}

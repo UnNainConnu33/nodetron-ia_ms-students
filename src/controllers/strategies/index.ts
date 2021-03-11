@@ -19,6 +19,7 @@ import semiCircle from './semiCircle'
 import Line from './line'
 import Goalkeeper from './goalkeeper'
 import uTurn from './uTurn'
+import KickShoot from './kick'
 
 
 export default {
@@ -42,4 +43,5 @@ export default {
   line: Line.declaration,
   goalkeeper: Goalkeeper.declaration,
   uTurn: uTurn.declaration,
+  kickShoot: KickShoot.declaration,
 }
