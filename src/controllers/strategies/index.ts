@@ -20,6 +20,7 @@ import Line from './line'
 import Goalkeeper from './goalkeeper'
 import uTurn from './uTurn'
 import KickShoot from './kick'
+import OrientationGoalLine from './orientationGoalLine'
 
 
 export default {
@@ -44,4 +45,5 @@ export default {
   goalkeeper: Goalkeeper.declaration,
   uTurn: uTurn.declaration,
   kickShoot: KickShoot.declaration,
+  orientationGoalLine: OrientationGoalLine.declaration,
 }

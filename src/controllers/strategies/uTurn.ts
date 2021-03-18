@@ -2,7 +2,7 @@ import { ActionSchema, Context, ServiceBroker } from 'moleculer'
 import { MoveToMessage } from '@nodetron/types/control/moveTo'
 import Strategies from '@nodetron/types/task-manager/tasks/strategies'
 import { state } from '../../models/state'
-import { sqrt, square, abs, sign, sin, cos, pi, and } from 'mathjs'
+import { sqrt, square, abs, sign, sin, cos, pi, and, i } from 'mathjs'
 import { Kick } from '@nodetron/types/enum'
 import { Vector} from '../../../../nodetron-math/src/Vector2D'
 import { OrderMessage } from '@nodetron/types/bots/order'
@@ -48,7 +48,6 @@ export default class uTurn extends Strategies {
             step ++
             console.log(step)
           }
-      }
 
       if (step == 2) { 
         void broker.call('control.moveTo', {
@@ -59,9 +58,13 @@ export default class uTurn extends Strategies {
           orientation: target2Ball.angle().value + pi,
           kick: Kick.NO,
         } as MoveToMessage)
+      }
+
+
         
       }
-    return step === 2
+     
+    return step == 2
     }
   }
 

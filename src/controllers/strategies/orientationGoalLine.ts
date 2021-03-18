@@ -6,7 +6,7 @@ import { sqrt, square, abs, sign, sin, cos, pi, and } from 'mathjs'
 import { Kick } from '@nodetron/types/enum'
 import { Vector} from '../../../../nodetron-math/src/Vector2D'
 
-// call "MSB.emptyGoal" ' { "id" : 5, "angle" : 1 }'
+// call "MSB.orientationGoalLine" ' { "id" : 0}'
 
 export default class OrientationGoalLine extends Strategies {
     name = 'orientationGoalLine';
@@ -27,12 +27,14 @@ export default class OrientationGoalLine extends Strategies {
     }
 
     compute(broker: ServiceBroker): boolean {
-      const robot = state.world.robots.allies[this.id]
       const ball = state.world.ball
+      let robot = state.world.robots.allies[this.id]
+      let target2Ball = new Vector(ball.position.x - robot.position.x, ball.position.y - robot.position.y)
+      let dist = Math.sqrt(((ball.position.x - robot.position.x) ** 2 - (ball.position.y - robot.position.y) ** 2))
       const goalCenter =  new Vector(-(state.world.field.length / 2.0), 0)
-      const target2Ball= new Vector(ball.position.x - goalCenter.x, ball.position.y - goalCenter.y )
       // const norm = Math.sqrt(target2Ball.x ** 2 + target2Ball.y ** 2)
       let step = 1
+
       if (step == 1) {
         void broker.call('control.moveTo', {
           id: this.id,
@@ -55,24 +57,11 @@ export default class OrientationGoalLine extends Strategies {
           target: ball.position,
           spin: true,
           power: 0,
-          orientation: target2Ball.angle().value + pi,
+          orientation: Math.atan2(-target2Ball.y, -target2Ball.x ),
           kick: Kick.NO,
         } as MoveToMessage)
         
       }
-    return step === 2
+    return step == 2
     }
   }
-  
-      void broker.call('control.moveTo', {
-        id: this.id,
-        target: ball.position,
-        spin: false,
-        power: 1.5,
-        orientation: Math.atan2(-target2Ball.y, -target2Ball.x ),
-        kick: Kick.FLAT,
-      } as MoveToMessage)
-      
-      return true
-    }
-}

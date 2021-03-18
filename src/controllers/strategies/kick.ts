@@ -6,7 +6,7 @@ import { sqrt, square, abs, sign, sin, cos, pi, and } from 'mathjs'
 import { Kick } from '@nodetron/types/enum'
 import { Vector} from '../../../../nodetron-math/src/Vector2D'
 
-// call "MSB.kickShoot" ' { "id" : 5, "angle" : 1 }'
+// call "MSB.kickShoot" ' { "id" : 5, "angle" : 0 }'
 
 export default class KickShoot extends Strategies {
     name = 'kick';
@@ -41,7 +41,7 @@ export default class KickShoot extends Strategies {
         id: this.id,
         target: ball.position,
         spin: false,
-        power: 1.5,
+        power: 1,
         orientation: Math.atan2(-target2Ball.y + this.angle, -target2Ball.x ),
         kick: Kick.FLAT,
       } as MoveToMessage)
